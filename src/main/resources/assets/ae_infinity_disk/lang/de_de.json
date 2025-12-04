@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "Unendliche Speicherplatte",
+  "tooltip.ae_infinity_disk.used_bytes": "Verwendet: %s",
+  "tooltip.ae_infinity_disk.stored_types": "Typen: %s",
+  "tooltip.ae_infinity_disk.empty": "Leer",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ Unendliche Kapazität & Typen",
+
+  "gui.ae_infinity_disk.title": "Unendliche Speicherplatte",
+  "gui.ae_infinity_disk.total_items": "Gesamtanzahl:",
+  "gui.ae_infinity_disk.distinct_types": "Itemtypen:",
+  "gui.ae_infinity_disk.used_bytes": "Verwendete Bytes:",
+  "gui.ae_infinity_disk.capacity": "Kapazität:",
+  "gui.ae_infinity_disk.type_limit": "Typenlimit:",
+  "gui.ae_infinity_disk.usage": "Nutzungsanzeige:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ Unbegrenzter Speicher ✦"
+}

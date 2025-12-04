@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "无限磁盘",
+  "tooltip.ae_infinity_disk.used_bytes": "已用: %s",
+  "tooltip.ae_infinity_disk.stored_types": "种类: %s",
+  "tooltip.ae_infinity_disk.empty": "空",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ 无限容量 & 无限种类",
+
+  "gui.ae_infinity_disk.title": "无限磁盘",
+  "gui.ae_infinity_disk.total_items": "物品总数:",
+  "gui.ae_infinity_disk.distinct_types": "物品种类:",
+  "gui.ae_infinity_disk.used_bytes": "已用字节:",
+  "gui.ae_infinity_disk.capacity": "存储容量:",
+  "gui.ae_infinity_disk.type_limit": "种类上限:",
+  "gui.ae_infinity_disk.usage": "使用量可视化:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ 无限存储 ✦"
+}

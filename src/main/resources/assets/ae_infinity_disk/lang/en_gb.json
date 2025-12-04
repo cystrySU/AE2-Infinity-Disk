@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "Infinity Disc",
+  "tooltip.ae_infinity_disk.used_bytes": "Used: %s",
+  "tooltip.ae_infinity_disk.stored_types": "Types: %s",
+  "tooltip.ae_infinity_disk.empty": "Empty",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ Infinite Capacity & Types",
+
+  "gui.ae_infinity_disk.title": "Infinity Disc",
+  "gui.ae_infinity_disk.total_items": "Total Items:",
+  "gui.ae_infinity_disk.distinct_types": "Item Types:",
+  "gui.ae_infinity_disk.used_bytes": "Used Bytes:",
+  "gui.ae_infinity_disk.capacity": "Capacity:",
+  "gui.ae_infinity_disk.type_limit": "Type Limit:",
+  "gui.ae_infinity_disk.usage": "Usage Visualisation:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ Unlimited Storage ✦"
+}

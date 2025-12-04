@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "Нескінченний Диск",
+  "tooltip.ae_infinity_disk.used_bytes": "Використано: %s",
+  "tooltip.ae_infinity_disk.stored_types": "Типів: %s",
+  "tooltip.ae_infinity_disk.empty": "Порожньо",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ Нескінченна Ємність & Типи",
+
+  "gui.ae_infinity_disk.title": "Нескінченний Диск",
+  "gui.ae_infinity_disk.total_items": "Всього предметів:",
+  "gui.ae_infinity_disk.distinct_types": "Типів предметів:",
+  "gui.ae_infinity_disk.used_bytes": "Використано байт:",
+  "gui.ae_infinity_disk.capacity": "Ємність:",
+  "gui.ae_infinity_disk.type_limit": "Ліміт типів:",
+  "gui.ae_infinity_disk.usage": "Візуалізація:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ Безлімітне Сховище ✦"
+}

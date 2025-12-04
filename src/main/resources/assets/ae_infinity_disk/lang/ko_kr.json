@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "무한 디스크",
+  "tooltip.ae_infinity_disk.used_bytes": "사용량: %s",
+  "tooltip.ae_infinity_disk.stored_types": "종류: %s",
+  "tooltip.ae_infinity_disk.empty": "비어 있음",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ 무한 용량 & 무한 종류",
+
+  "gui.ae_infinity_disk.title": "무한 디스크",
+  "gui.ae_infinity_disk.total_items": "총 아이템:",
+  "gui.ae_infinity_disk.distinct_types": "아이템 종류:",
+  "gui.ae_infinity_disk.used_bytes": "사용 바이트:",
+  "gui.ae_infinity_disk.capacity": "용량:",
+  "gui.ae_infinity_disk.type_limit": "종류 제한:",
+  "gui.ae_infinity_disk.usage": "사용량:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ 무한 저장소 ✦"
+}

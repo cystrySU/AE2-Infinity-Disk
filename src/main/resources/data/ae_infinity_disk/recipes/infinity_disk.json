@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "ultimate_crafts",
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:turtle_helmet"
+    },
+    "B": {
+      "item": "minecraft:dragon_head"
+    },
+    "C": {
+      "item": "minecraft:totem_of_undying"
+    },
+    "D": {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    "E": {
+      "item": "ae2:item_storage_cell_256k"
+    },
+    "F": {
+      "item": "minecraft:echo_shard"
+    },
+    "G": {
+      "item": "minecraft:netherite_block"
+    },
+    "H": {
+      "item": "minecraft:nether_star"
+    },
+    "I": {
+      "item": "minecraft:enchanted_golden_apple"
+    }
+  },
+  "result": {
+    "item": "ae_infinity_disk:infinity_disk",
+    "count": 1
+  }
+}

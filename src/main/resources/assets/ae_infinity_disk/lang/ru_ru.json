@@ -1,0 +1,17 @@
+{
+  "item.ae_infinity_disk.infinity_disk": "Бесконечный Диск",
+  "tooltip.ae_infinity_disk.used_bytes": "Использовано: %s",
+  "tooltip.ae_infinity_disk.stored_types": "Типов: %s",
+  "tooltip.ae_infinity_disk.empty": "Пусто",
+  "tooltip.ae_infinity_disk.uuid": "ID: %s",
+  "tooltip.ae_infinity_disk.infinite_capacity": "§6∞ Бесконечная Ёмкость & Типы",
+
+  "gui.ae_infinity_disk.title": "Бесконечный Диск",
+  "gui.ae_infinity_disk.total_items": "Всего предметов:",
+  "gui.ae_infinity_disk.distinct_types": "Типов предметов:",
+  "gui.ae_infinity_disk.used_bytes": "Использовано байт:",
+  "gui.ae_infinity_disk.capacity": "Ёмкость:",
+  "gui.ae_infinity_disk.type_limit": "Лимит типов:",
+  "gui.ae_infinity_disk.usage": "Визуализация:",
+  "gui.ae_infinity_disk.infinite_hint": "§6✦ Безлимитное Хранилище ✦"
+}
