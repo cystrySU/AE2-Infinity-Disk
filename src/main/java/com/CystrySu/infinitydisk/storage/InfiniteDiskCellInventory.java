@@ -173,14 +173,18 @@ public class InfiniteDiskCellInventory implements StorageCell {
      }
 
     /**
-     * 保存更改
+     * 保存更改（使用脏标记优化，仅在数据实际变化时保存）
      */
     private void saveChanges() {
-        isPersisted = false;
-        saveToNBT();
-        
-        if (saveProvider != null) {
-            saveProvider.saveChanges();
+        // 检查管理器的脏标记，避免不必要的序列化
+        if (storage.getManager().isDirty()) {
+            isPersisted = false;
+            saveToNBT();
+            storage.getManager().clearDirty();
+            
+            if (saveProvider != null) {
+                saveProvider.saveChanges();
+            }
         }
     }
 
@@ -190,6 +194,15 @@ public class InfiniteDiskCellInventory implements StorageCell {
     private void saveToNBT() {
         CompoundTag tag = stack.getOrCreateTag();
         tag.put(TAG_STORAGE, storage.save());
+    }
+
+    /**
+     * 强制保存（忽略脏标记）
+     */
+    public void forceSave() {
+        saveToNBT();
+        storage.getManager().clearDirty();
+        isPersisted = true;
     }
 
     /**

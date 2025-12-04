@@ -32,6 +32,17 @@ public class InfiniteDiskManager {
      */
     private long instanceTypeSoftLimit = -1;
     
+    // ==================== 性能优化：缓存变量 ====================
+    
+    /** 缓存的总物品数量，避免每次遍历计算 */
+    private long cachedTotalCount = 0;
+    
+    /** 缓存是否有效 */
+    private boolean totalCountCacheValid = false;
+    
+    /** 脏标记：数据是否已修改但未保存 */
+    private boolean dirty = false;
+    
     /** NBT 标签名称常量 */
     private static final String TAG_SOFT_LIMIT = "softLimit";
     private static final String TAG_TYPE_SOFT_LIMIT = "typeSoftLimit";
@@ -117,6 +128,12 @@ public class InfiniteDiskManager {
         
         storage.add(key, allowedAmount);
         
+        // 更新缓存
+        if (totalCountCacheValid) {
+            cachedTotalCount += allowedAmount;
+        }
+        dirty = true;
+        
         if (Config.enableDebugLogging) {
             LOGGER.debug("Inserted {} x {} (requested: {})", key, allowedAmount, amount);
         }
@@ -135,6 +152,13 @@ public class InfiniteDiskManager {
             return 0;
         }
         storage.add(key, amount);
+        
+        // 更新缓存
+        if (totalCountCacheValid) {
+            cachedTotalCount += amount;
+        }
+        dirty = true;
+        
         return amount;
     }
 
@@ -154,6 +178,12 @@ public class InfiniteDiskManager {
         
         if (extracted > 0) {
             storage.remove(key, extracted);
+            
+            // 更新缓存
+            if (totalCountCacheValid) {
+                cachedTotalCount -= extracted;
+            }
+            dirty = true;
             
             if (Config.enableDebugLogging) {
                 LOGGER.debug("Extracted {} x {} (requested: {})", key, extracted, amount);
@@ -207,14 +237,39 @@ public class InfiniteDiskManager {
     }
 
     /**
-     * 获取存储的总物品数量
+     * 获取存储的总物品数量（使用缓存优化）
      */
     public long getTotalCount() {
-        long total = 0;
-        for (var entry : storage) {
-            total += entry.getLongValue();
+        if (!totalCountCacheValid) {
+            // 缓存失效，重新计算
+            cachedTotalCount = 0;
+            for (var entry : storage) {
+                cachedTotalCount += entry.getLongValue();
+            }
+            totalCountCacheValid = true;
         }
-        return total;
+        return cachedTotalCount;
+    }
+    
+    /**
+     * 使缓存失效（当外部直接修改存储时调用）
+     */
+    public void invalidateCache() {
+        totalCountCacheValid = false;
+    }
+    
+    /**
+     * 检查数据是否已修改
+     */
+    public boolean isDirty() {
+        return dirty;
+    }
+    
+    /**
+     * 清除脏标记（保存后调用）
+     */
+    public void clearDirty() {
+        dirty = false;
     }
 
     /**
@@ -236,6 +291,9 @@ public class InfiniteDiskManager {
      */
     public void clear() {
         storage.clear();
+        cachedTotalCount = 0;
+        totalCountCacheValid = true;
+        dirty = true;
         if (Config.enableDebugLogging) {
             LOGGER.debug("Storage cleared");
         }
@@ -313,6 +371,8 @@ public class InfiniteDiskManager {
      */
     public void load(CompoundTag tag) {
         storage.clear();
+        totalCountCacheValid = false; // 加载后需要重新计算缓存
+        dirty = false; // 刚加载的数据是干净的
         
         if (tag == null) {
             return;

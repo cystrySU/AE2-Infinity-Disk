@@ -1,4 +1,25 @@
-1.19.2 Changelog
+AE Infinity Disk Changelog
+==========================
+
+1.1.0
+=====
+ - 性能优化: InfiniteDiskManager 添加缓存变量，getTotalCount() 不再每次遍历计算
+ - 性能优化: 添加脏标记 (dirty flag) 避免不必要的 NBT 序列化
+ - 性能优化: ItemInfiniteDisk 添加轻量级 NBT 读取方法用于 Tooltip
+ - 性能优化: inventoryTick 优化，避免每 tick 检查 UUID
+ - GUI 优化: 改用纯色背景 RGB(198,198,198)，移除纹理加载
+ - GUI 优化: 添加字符串格式化缓存，减少每帧对象创建
+
+1.0.0
+=====
+ - 初始版本发布
+ - 支持 Minecraft 1.19.2 / Forge 43.5.0
+ - 提供无限容量和无限种类的 AE2 存储磁盘
+ - 可配置软上限、能量消耗等参数
+
+========================================
+Forge 1.19.2 Changelog
+========================================
 43.5
 ====
  - 43.5.0 1.19.2 RB 5

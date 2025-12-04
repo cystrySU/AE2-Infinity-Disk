@@ -1,9 +1,12 @@
 package com.CystrySu.infinitydisk.item;
 
+import appeng.api.stacks.AEKey;
 import com.CystrySu.infinitydisk.menu.InfinityDiskMenu;
 import com.CystrySu.infinitydisk.storage.InfiniteDiskCellInventory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +35,8 @@ public class ItemInfiniteDisk extends Item {
     
     private static final String TAG_STORAGE = "infinity_storage";
     private static final String TAG_UUID = "disk_uuid";
+    private static final String TAG_ITEMS = "items";
+    private static final String TAG_COUNT = "count";
     
     /**
      * AE2 字节计算规则：
@@ -43,6 +48,57 @@ public class ItemInfiniteDisk extends Item {
 
     public ItemInfiniteDisk(Properties properties) {
         super(properties);
+    }
+    
+    // ==================== 轻量级 NBT 读取（性能优化） ====================
+    
+    /**
+     * 轻量级统计数据容器，避免创建完整的 CellInventory
+     */
+    public static class DiskStats {
+        public final long totalItems;
+        public final long distinctTypes;
+        
+        public DiskStats(long totalItems, long distinctTypes) {
+            this.totalItems = totalItems;
+            this.distinctTypes = distinctTypes;
+        }
+    }
+    
+    /**
+     * 轻量级读取磁盘统计数据，直接从 NBT 解析
+     * 避免创建 InfiniteDiskCellInventory 实例，用于 Tooltip 等场景
+     * @param stack 磁盘物品
+     * @return 统计数据，如果无数据返回 null
+     */
+    @Nullable
+    public static DiskStats readStatsFromNBT(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains(TAG_STORAGE)) {
+            return null;
+        }
+        
+        CompoundTag storageTag = tag.getCompound(TAG_STORAGE);
+        if (!storageTag.contains(TAG_ITEMS, Tag.TAG_LIST)) {
+            return new DiskStats(0, 0);
+        }
+        
+        ListTag itemList = storageTag.getList(TAG_ITEMS, Tag.TAG_COMPOUND);
+        long totalItems = 0;
+        long distinctTypes = 0;
+        
+        for (int i = 0; i < itemList.size(); i++) {
+            CompoundTag itemTag = itemList.getCompound(i);
+            if (itemTag.contains(TAG_COUNT)) {
+                long count = itemTag.getLong(TAG_COUNT);
+                if (count > 0) {
+                    totalItems += count;
+                    distinctTypes++;
+                }
+            }
+        }
+        
+        return new DiskStats(totalItems, distinctTypes);
     }
     
     // ==================== 交互功能 ====================
@@ -132,20 +188,17 @@ public class ItemInfiniteDisk extends Item {
     }
 
     /**
-     * 添加物品提示信息
+     * 添加物品提示信息（使用轻量级 NBT 读取，性能优化）
      */
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains(TAG_STORAGE)) {
-            // 创建临时存储以读取数据
-            InfiniteDiskCellInventory inventory = new InfiniteDiskCellInventory(stack, null);
-            
-            long totalItems = inventory.getTotalItemCount();
-            long distinctTypes = inventory.getDistinctTypeCount();
-            long usedBytes = calculateUsedBytes(totalItems, distinctTypes);
+        // 使用轻量级方法读取统计数据，避免创建完整的 CellInventory
+        DiskStats stats = readStatsFromNBT(stack);
+        
+        if (stats != null) {
+            long usedBytes = calculateUsedBytes(stats.totalItems, stats.distinctTypes);
             
             // 显示字节使用量
             tooltip.add(Component.translatable("tooltip.ae_infinity_disk.used_bytes", 
@@ -154,7 +207,7 @@ public class ItemInfiniteDisk extends Item {
             
             // 显示物品种类数
             tooltip.add(Component.translatable("tooltip.ae_infinity_disk.stored_types", 
-                    formatNumber(distinctTypes))
+                    formatNumber(stats.distinctTypes))
                     .withStyle(ChatFormatting.GRAY));
         } else {
             tooltip.add(Component.translatable("tooltip.ae_infinity_disk.empty")
@@ -209,15 +262,18 @@ public class ItemInfiniteDisk extends Item {
     }
     
     /**
-     * 物品首次进入物品栏时自动创建 UUID
+     * 物品首次进入物品栏时自动创建 UUID（已优化：避免每 tick 检查）
      */
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         
-        // 确保磁盘有 UUID
+        // 优化：只在服务端且 UUID 不存在时才创建
         if (!level.isClientSide()) {
-            getOrCreateUUID(stack);
+            CompoundTag tag = stack.getTag();
+            if (tag == null || !tag.hasUUID(TAG_UUID)) {
+                getOrCreateUUID(stack);
+            }
         }
     }
     

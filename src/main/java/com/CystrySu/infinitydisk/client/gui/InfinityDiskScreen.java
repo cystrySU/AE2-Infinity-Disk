@@ -1,36 +1,40 @@
 package com.CystrySu.infinitydisk.client.gui;
 
-import com.CystrySu.infinitydisk.Infinitydisk;
-import com.CystrySu.infinitydisk.item.ItemInfiniteDisk;
 import com.CystrySu.infinitydisk.menu.InfinityDiskMenu;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
  * 无限磁盘信息界面
  * 显示磁盘的存储统计信息
+ * 使用纯色背景，无需纹理加载，性能更优
  */
 public class InfinityDiskScreen extends AbstractContainerScreen<InfinityDiskMenu> {
     
-    // 使用 Minecraft 默认容器背景纹理
-    @SuppressWarnings({"removal", "deprecation"})
-    private static final ResourceLocation TEXTURE =
-            new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
-
     // GUI 尺寸
     private static final int GUI_WIDTH = 176;
     private static final int GUI_HEIGHT = 166;
     
     // 进度条位置和尺寸
     private static final int BAR_X = 8;
-    private static final int BAR_Y = 60;
     private static final int BAR_WIDTH = 160;
     private static final int BAR_HEIGHT = 8;
+    
+    // MC 标准灰色背景 RGB(198, 198, 198)
+    private static final int BG_COLOR = 0xFFC6C6C6;
+    // 边框颜色
+    private static final int BORDER_LIGHT = 0xFFFFFFFF;  // 白色高光
+    private static final int BORDER_DARK = 0xFF555555;   // 深色阴影
+    private static final int BORDER_DARKER = 0xFF373737; // 更深阴影
+    
+    // 缓存的格式化字符串，避免重复创建
+    private String cachedTotalItems = "";
+    private String cachedDistinctTypes = "";
+    private String cachedUsedBytes = "";
+    private long lastTotalItems = -1;
+    private long lastDistinctTypes = -1;
     
     public InfinityDiskScreen(InfinityDiskMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -57,15 +61,26 @@ public class InfinityDiskScreen extends AbstractContainerScreen<InfinityDiskMenu
 
     @Override
     protected void renderBg(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, TEXTURE);
+        int x = this.leftPos;
+        int y = this.topPos;
         
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
+        // 绘制 MC 风格的面板背景（纯色 + 3D 边框效果）
+        // 主背景
+        fill(poseStack, x, y, x + imageWidth, y + imageHeight, BG_COLOR);
         
-        // 绘制背景（如果纹理不存在，会显示为紫黑方格）
-        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        // 3D 边框效果 - 左上高光
+        hLine(poseStack, x, x + imageWidth - 1, y, BORDER_LIGHT);
+        vLine(poseStack, x, y, y + imageHeight - 1, BORDER_LIGHT);
+        
+        // 3D 边框效果 - 右下阴影
+        hLine(poseStack, x + 1, x + imageWidth - 1, y + imageHeight - 1, BORDER_DARKER);
+        vLine(poseStack, x + imageWidth - 1, y + 1, y + imageHeight - 1, BORDER_DARKER);
+        
+        // 内边框
+        hLine(poseStack, x + 1, x + imageWidth - 2, y + 1, BORDER_LIGHT);
+        vLine(poseStack, x + 1, y + 1, y + imageHeight - 2, BORDER_LIGHT);
+        hLine(poseStack, x + 2, x + imageWidth - 2, y + imageHeight - 2, BORDER_DARK);
+        vLine(poseStack, x + imageWidth - 2, y + 2, y + imageHeight - 2, BORDER_DARK);
     }
     
     @Override
@@ -76,7 +91,15 @@ public class InfinityDiskScreen extends AbstractContainerScreen<InfinityDiskMenu
         // 获取数据
         long totalItems = menu.getTotalItems();
         long distinctTypes = menu.getDistinctTypes();
-        long usedBytes = menu.getUsedBytes();
+        
+        // 缓存格式化字符串，只在数据变化时重新格式化
+        if (totalItems != lastTotalItems || distinctTypes != lastDistinctTypes) {
+            lastTotalItems = totalItems;
+            lastDistinctTypes = distinctTypes;
+            cachedTotalItems = formatNumber(totalItems);
+            cachedDistinctTypes = formatNumber(distinctTypes);
+            cachedUsedBytes = formatBytes(menu.getUsedBytes());
+        }
         
         int textY = 20;
         int lineHeight = 12;
@@ -87,77 +110,60 @@ public class InfinityDiskScreen extends AbstractContainerScreen<InfinityDiskMenu
         // ==================== 统计信息 ====================
         
         // 总物品数量
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.total_items"), 
-                8, textY, textColor);
-        this.font.draw(poseStack, 
-                formatNumber(totalItems), 
-                GUI_WIDTH - 8 - font.width(formatNumber(totalItems)), textY, valueColor);
+        Component totalLabel = Component.translatable("gui.ae_infinity_disk.total_items");
+        this.font.draw(poseStack, totalLabel, 8, textY, textColor);
+        this.font.draw(poseStack, cachedTotalItems, 
+                GUI_WIDTH - 8 - font.width(cachedTotalItems), textY, valueColor);
         textY += lineHeight;
         
         // 物品种类数
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.distinct_types"), 
-                8, textY, textColor);
-        this.font.draw(poseStack, 
-                formatNumber(distinctTypes), 
-                GUI_WIDTH - 8 - font.width(formatNumber(distinctTypes)), textY, valueColor);
+        Component typesLabel = Component.translatable("gui.ae_infinity_disk.distinct_types");
+        this.font.draw(poseStack, typesLabel, 8, textY, textColor);
+        this.font.draw(poseStack, cachedDistinctTypes, 
+                GUI_WIDTH - 8 - font.width(cachedDistinctTypes), textY, valueColor);
         textY += lineHeight;
         
         // 已使用字节
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.used_bytes"), 
-                8, textY, textColor);
-        this.font.draw(poseStack, 
-                formatBytes(usedBytes), 
-                GUI_WIDTH - 8 - font.width(formatBytes(usedBytes)), textY, valueColor);
+        Component bytesLabel = Component.translatable("gui.ae_infinity_disk.used_bytes");
+        this.font.draw(poseStack, bytesLabel, 8, textY, textColor);
+        this.font.draw(poseStack, cachedUsedBytes, 
+                GUI_WIDTH - 8 - font.width(cachedUsedBytes), textY, valueColor);
         textY += lineHeight + 4;
         
         // ==================== 容量信息 ====================
         
-        // 容量标签
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.capacity"), 
-                8, textY, textColor);
-        
-        // 无限符号
+        // 无限符号（常量，避免重复创建）
         String infinitySymbol = "∞";
-        this.font.draw(poseStack, 
-                infinitySymbol, 
-                GUI_WIDTH - 8 - font.width(infinitySymbol), textY, infinityColor);
+        int infinityWidth = font.width(infinitySymbol);
+        
+        // 容量标签
+        Component capacityLabel = Component.translatable("gui.ae_infinity_disk.capacity");
+        this.font.draw(poseStack, capacityLabel, 8, textY, textColor);
+        this.font.draw(poseStack, infinitySymbol, GUI_WIDTH - 8 - infinityWidth, textY, infinityColor);
         textY += lineHeight;
         
         // 种类上限
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.type_limit"), 
-                8, textY, textColor);
-        this.font.draw(poseStack, 
-                infinitySymbol, 
-                GUI_WIDTH - 8 - font.width(infinitySymbol), textY, infinityColor);
+        Component typeLimitLabel = Component.translatable("gui.ae_infinity_disk.type_limit");
+        this.font.draw(poseStack, typeLimitLabel, 8, textY, textColor);
+        this.font.draw(poseStack, infinitySymbol, GUI_WIDTH - 8 - infinityWidth, textY, infinityColor);
         textY += lineHeight + 8;
         
         // ==================== 可视化进度条 ====================
         
         // 进度条标签
-        this.font.draw(poseStack, 
-                Component.translatable("gui.ae_infinity_disk.usage"), 
-                8, textY, textColor);
+        Component usageLabel = Component.translatable("gui.ae_infinity_disk.usage");
+        this.font.draw(poseStack, usageLabel, 8, textY, textColor);
         textY += lineHeight;
         
-        // 绘制进度条背景
+        // 绘制进度条（内凹效果）
+        // 外边框阴影
+        fill(poseStack, BAR_X - 1, textY - 1, BAR_X + BAR_WIDTH + 1, textY + BAR_HEIGHT + 1, BORDER_DARK);
+        // 进度条背景
         fill(poseStack, BAR_X, textY, BAR_X + BAR_WIDTH, textY + BAR_HEIGHT, 0xFF333333);
         
-        // 绘制进度条边框
-        hLine(poseStack, BAR_X - 1, BAR_X + BAR_WIDTH, textY - 1, 0xFF000000);
-        hLine(poseStack, BAR_X - 1, BAR_X + BAR_WIDTH, textY + BAR_HEIGHT, 0xFF000000);
-        vLine(poseStack, BAR_X - 1, textY - 1, textY + BAR_HEIGHT, 0xFF000000);
-        vLine(poseStack, BAR_X + BAR_WIDTH, textY - 1, textY + BAR_HEIGHT, 0xFF000000);
-        
-        // 绘制已使用部分（使用渐变色）
-        // 由于容量无限，我们用对数刻度显示
+        // 绘制已使用部分
         int filledWidth = calculateBarWidth(totalItems);
         if (filledWidth > 0) {
-            // 渐变色从绿色到黄色到红色
             int color = getColorForUsage(filledWidth);
             fill(poseStack, BAR_X, textY, BAR_X + filledWidth, textY + BAR_HEIGHT, color);
         }
@@ -169,8 +175,7 @@ public class InfinityDiskScreen extends AbstractContainerScreen<InfinityDiskMenu
         // 显示无限容量提示
         Component infiniteHint = Component.translatable("gui.ae_infinity_disk.infinite_hint");
         int hintWidth = font.width(infiniteHint);
-        this.font.draw(poseStack, infiniteHint, 
-                (GUI_WIDTH - hintWidth) / 2f, textY, infinityColor);
+        this.font.draw(poseStack, infiniteHint, (GUI_WIDTH - hintWidth) / 2f, textY, infinityColor);
     }
     
     /**
