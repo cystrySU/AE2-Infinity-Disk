@@ -84,9 +84,10 @@ public class InfinityDiskCommands {
         source.sendSuccess(Component.literal("=== Infinity Disk Config ===").withStyle(ChatFormatting.GOLD), false);
         source.sendSuccess(Component.literal("Soft Limit: " + (Config.softLimit <= 0 ? "Unlimited" : Config.softLimit)).withStyle(ChatFormatting.WHITE), false);
         source.sendSuccess(Component.literal("Type Soft Limit: " + (Config.typeSoftLimit <= 0 ? "Unlimited" : Config.typeSoftLimit)).withStyle(ChatFormatting.WHITE), false);
-        source.sendSuccess(Component.literal("Energy Enabled: " + Config.enableEnergyConsumption).withStyle(ChatFormatting.AQUA), false);
+        source.sendSuccess(Component.literal("Dynamic Energy Drain: " + Config.enableDynamicEnergyDrain).withStyle(ChatFormatting.AQUA), false);
         source.sendSuccess(Component.literal("Energy Multiplier: " + Config.energyMultiplier).withStyle(ChatFormatting.AQUA), false);
         source.sendSuccess(Component.literal("Base Idle Drain: " + Config.baseIdleDrain + " AE/t").withStyle(ChatFormatting.AQUA), false);
+        source.sendSuccess(Component.literal("Max Idle Drain: " + (Config.maxIdleDrain <= 0 ? "No cap" : Config.maxIdleDrain + " AE/t")).withStyle(ChatFormatting.AQUA), false);
         source.sendSuccess(Component.literal("Idle Drain per 1K Items: " + Config.idleDrainPerThousandItems + " AE/t").withStyle(ChatFormatting.AQUA), false);
         source.sendSuccess(Component.literal("Idle Drain per 100 Types: " + Config.idleDrainPerHundredTypes + " AE/t").withStyle(ChatFormatting.AQUA), false);
         source.sendSuccess(Component.literal("Debug Logging: " + Config.enableDebugLogging).withStyle(ChatFormatting.YELLOW), false);

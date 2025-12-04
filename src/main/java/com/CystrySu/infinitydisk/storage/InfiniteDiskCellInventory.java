@@ -102,11 +102,7 @@ public class InfiniteDiskCellInventory implements StorageCell {
      */
     @Override
     public double getIdleDrain() {
-        if (!Config.enableEnergyConsumption) {
-            return 0.0;
-        }
-        
-        // 使用配置系统计算动态能耗
+        // 使用配置系统计算能耗（已包含动态/固定能耗逻辑和上限）
         return Config.calculateIdleDrain(
             storage.getTotalItemCount(), 
             storage.getDistinctTypeCount()

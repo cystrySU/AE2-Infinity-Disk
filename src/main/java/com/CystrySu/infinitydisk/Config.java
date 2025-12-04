@@ -44,8 +44,11 @@ public class Config {
     /** 每 100 种物品类型增加的额外能耗 */
     public static double idleDrainPerHundredTypes = 0.5;
     
-    /** 是否启用能量消耗（设为 false 则免费使用） */
-    public static boolean enableEnergyConsumption = true;
+    /** 最大空闲能耗上限 (AE/t)，0 表示无上限 */
+    public static double maxIdleDrain = 512000.0;
+    
+    /** 是否启用动态能量消耗（根据物品数量增加能耗） */
+    public static boolean enableDynamicEnergyDrain = false;
     
     /** 是否在日志中输出调试信息 */
     public static boolean enableDebugLogging = false;
@@ -61,7 +64,8 @@ public class Config {
         public final ForgeConfigSpec.DoubleValue baseIdleDrain;
         public final ForgeConfigSpec.DoubleValue idleDrainPerThousandItems;
         public final ForgeConfigSpec.DoubleValue idleDrainPerHundredTypes;
-        public final ForgeConfigSpec.BooleanValue enableEnergyConsumption;
+        public final ForgeConfigSpec.DoubleValue maxIdleDrain;
+        public final ForgeConfigSpec.BooleanValue enableDynamicEnergyDrain;
         public final ForgeConfigSpec.BooleanValue enableDebugLogging;
         
         public CommonConfig(ForgeConfigSpec.Builder builder) {
@@ -89,12 +93,14 @@ public class Config {
             builder.comment("Energy Configuration")
                    .push("energy");
             
-            enableEnergyConsumption = builder
+            enableDynamicEnergyDrain = builder
                     .comment(
-                            "Whether the Infinity Disk consumes energy from the AE2 network.",
-                            "Set to false for free operation."
+                            "Whether the Infinity Disk energy consumption scales with stored items.",
+                            "When FALSE (default): disk uses fixed baseIdleDrain energy.",
+                            "When TRUE: energy consumption increases based on stored items and types,",
+                            "capped at maxIdleDrain."
                     )
-                    .define("enableEnergyConsumption", true);
+                    .define("enableDynamicEnergyDrain", false);
             
             energyMultiplier = builder
                     .comment(
@@ -107,23 +113,32 @@ public class Config {
             baseIdleDrain = builder
                     .comment(
                             "Base idle energy drain in AE/tick when the disk is in a drive.",
-                            "This is the minimum energy consumption."
+                            "This is the fixed energy consumption when enableDynamicEnergyDrain is false,",
+                            "or the minimum energy consumption when enableDynamicEnergyDrain is true."
                     )
                     .defineInRange("baseIdleDrain", 1.0D, 0.0D, 1000.0D);
             
             idleDrainPerThousandItems = builder
                     .comment(
                             "Additional idle drain (AE/t) per 1000 items stored.",
-                            "Allows energy cost to scale with usage."
+                            "Only applies when enableDynamicEnergyDrain is true."
                     )
                     .defineInRange("idleDrainPerThousandItems", 0.1D, 0.0D, 100.0D);
             
             idleDrainPerHundredTypes = builder
                     .comment(
                             "Additional idle drain (AE/t) per 100 different item types stored.",
-                            "Allows energy cost to scale with variety."
+                            "Only applies when enableDynamicEnergyDrain is true."
                     )
                     .defineInRange("idleDrainPerHundredTypes", 0.5D, 0.0D, 100.0D);
+            
+            maxIdleDrain = builder
+                    .comment(
+                            "Maximum idle energy drain cap in AE/tick (default: 512000 = 512k AE/t).",
+                            "Only applies when enableDynamicEnergyDrain is true.",
+                            "Set to 0 for no cap (not recommended)."
+                    )
+                    .defineInRange("maxIdleDrain", 512000.0D, 0.0D, Double.MAX_VALUE);
             
             builder.pop();
             
@@ -158,7 +173,8 @@ public class Config {
         baseIdleDrain = COMMON.baseIdleDrain.get();
         idleDrainPerThousandItems = COMMON.idleDrainPerThousandItems.get();
         idleDrainPerHundredTypes = COMMON.idleDrainPerHundredTypes.get();
-        enableEnergyConsumption = COMMON.enableEnergyConsumption.get();
+        maxIdleDrain = COMMON.maxIdleDrain.get();
+        enableDynamicEnergyDrain = COMMON.enableDynamicEnergyDrain.get();
         enableDebugLogging = COMMON.enableDebugLogging.get();
     }
     
@@ -171,13 +187,20 @@ public class Config {
      * @return 空闲能耗 (AE/t)
      */
     public static double calculateIdleDrain(long totalItems, long totalTypes) {
-        if (!enableEnergyConsumption) {
-            return 0.0;
+        // 如果未启用动态能耗，返回固定的基础能耗
+        if (!enableDynamicEnergyDrain) {
+            return baseIdleDrain;
         }
         
+        // 计算动态能耗
         double drain = baseIdleDrain;
         drain += (totalItems / 1000.0) * idleDrainPerThousandItems;
         drain += (totalTypes / 100.0) * idleDrainPerHundredTypes;
+        
+        // 应用能耗上限（如果配置了）
+        if (maxIdleDrain > 0 && drain > maxIdleDrain) {
+            drain = maxIdleDrain;
+        }
         
         return drain;
     }
@@ -188,9 +211,6 @@ public class Config {
      * @return 实际能量消耗
      */
     public static double calculateOperationEnergy(double baseEnergy) {
-        if (!enableEnergyConsumption) {
-            return 0.0;
-        }
         return baseEnergy * energyMultiplier;
     }
     
