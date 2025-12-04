@@ -1,7 +1,6 @@
 package com.CystrySu.infinitydisk;
 
 import appeng.api.storage.StorageCells;
-import com.CystrySu.infinitydisk.command.InfinityDiskCommands;
 import com.CystrySu.infinitydisk.item.ItemInfiniteDisk;
 import com.CystrySu.infinitydisk.menu.InfinityDiskMenu;
 import com.CystrySu.infinitydisk.networking.NetworkHandler;
@@ -110,15 +109,7 @@ public class Infinitydisk
         LOGGER.info("AE Infinity Disk - Server Starting");
     }
     
-    /**
-     * 注册调试命令
-     */
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event)
-    {
-        InfinityDiskCommands.register(event.getDispatcher());
-        LOGGER.info("AE Infinity Disk - Registered Commands");
-    }
+    // 测试阶段的调试命令已移除，避免在发行版中暴露不必要的指令
 
     // ==================== 客户端事件 ====================
     

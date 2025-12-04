@@ -49,6 +49,10 @@
 ### 1.0.0
 - 初始版本发布
 
+## 🧩 指令
+
+本发行版不包含任何调试或测试阶段的游戏内指令；所有功能通过 AE2 常规交互与配置文件实现。
+
 ## 📜 许可证
 
 本项目采用 [GNU Lesser General Public License v3.0](LICENSE.txt)（LGPL-3.0-only）。
