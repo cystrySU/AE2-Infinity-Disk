@@ -105,14 +105,6 @@ Version numbers follow the release tags on the project’s distribution platform
 
 ---
 
-## Localization
-
-AE Infinity Disk includes built-in translations for multiple languages (for example: Chinese, English, German, Spanish, French, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Ukrainian, and others).
-
-Contributions for additional languages or improvements to existing translations are welcome via pull requests.
-
----
-
 ## License
 
 This project is licensed under the [GNU Lesser General Public License v3.0](LICENSE) (LGPL-3.0-only).
